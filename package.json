@@ -1,0 +1,23 @@
+{
+  "name": "companies",
+  "version": "1.0.0",
+  "description": "Companies",
+  "main": "server.js",
+  "scripts": {
+    "test": "node server.js",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ibodi/Companies.git"
+  },
+  "keywords": [
+    "company"
+  ],
+  "author": "Bohdan Shcherbak",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ibodi/Companies/issues"
+  },
+  "homepage": "https://github.com/ibodi/Companies#readme"
+}
