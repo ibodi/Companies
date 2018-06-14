@@ -19,5 +19,9 @@
   "bugs": {
     "url": "https://github.com/ibodi/Companies/issues"
   },
-  "homepage": "https://github.com/ibodi/Companies#readme"
+  "homepage": "https://github.com/ibodi/Companies#readme",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.3"
+  }
 }
