@@ -4,16 +4,22 @@ Array.prototype.contains = function (value) {
     return this.indexOf(value) > -1;
 };
 
-// Designed for containing a number which if added to one becomes an _id of
+String.prototype.replaceAll = function(search, replacement) {
+    var target = this;
+    return target.split(search).join(replacement);
+};
+
+// Designed for containing a number which if added to one becomes an id of
 // newly created company.
 let maxId;
+
 // Designed for containing all company names so that we could prevent
 // adding a company with already used name or replacing a company name
 // with already used name.
 let companyNames = [];
 
 // This will be executed after the page is loaded for 
-// taking data from database and drawing the tree of companies
+// taking data from the database and drawing the list of trees of companies
 // might take some time 
 setTimeout(() => {
     let xhttp = new XMLHttpRequest();
@@ -21,24 +27,34 @@ setTimeout(() => {
         if (this.readyState == 4 && this.status == 200) {
             let report = JSON.parse(this.responseText);
             if(!report.success) {
-                error.innerHTML = "<li>Failed to load companies tree. " + report.cause + "</li>";
+                error.innerHTML = "<li>Failed to load companies tree.</li>";
+                console.error(report.cause);
                 return;
             }
             maxId = report.maxId;
-            console.log(maxId);
             let companies = report.companies;
             updateCompanyNames(companies);
 
             let companiesHTMLElement = createCompaniesHTMLElement(companies);
 
             let liAddRootCompanyButton = document.createElement("li");
+
+            let tableAddRootCompanyButton = document.createElement("table");
+            let trAddRootCompanyButton = document.createElement("tr");
+            let tdAddRootCompanyButton = document.createElement("td");
+            trAddRootCompanyButton.appendChild(tdAddRootCompanyButton);
+            tableAddRootCompanyButton.appendChild(trAddRootCompanyButton);
+
             let addRootCompanyButton = document.createElement("button");
             addRootCompanyButton.innerHTML = "ADD ROOT COMPANY";
             addRootCompanyButton.onclick = ()=>{
-                let li = addCompanyInputField(null);
+                let li = createCompanyInputField(null);
                 companiesHTMLElement.appendChild(li);
             };
-            liAddRootCompanyButton.appendChild(addRootCompanyButton);
+
+            tdAddRootCompanyButton.appendChild(addRootCompanyButton);
+            liAddRootCompanyButton.appendChild(tableAddRootCompanyButton);
+
             companiesHTMLElement.prepend(liAddRootCompanyButton)
             
             container.appendChild(companiesHTMLElement);
@@ -48,6 +64,7 @@ setTimeout(() => {
     xhttp.send();
 }, 0);
 
+// Adds company names to array companyNames
 function updateCompanyNames(companies) {
     for(let company of companies) {
         companyNames.push(company.name);
@@ -55,6 +72,7 @@ function updateCompanyNames(companies) {
     }
 }
 
+// Creates ul element, which is designed to contain a list of trees of companies of the argument array
 function createCompaniesHTMLElement(companies) {
     let ul = document.createElement("ul");
     for(let company of companies) {
@@ -64,6 +82,7 @@ function createCompaniesHTMLElement(companies) {
     return ul;
 }
 
+// Creates a li element which is designed to contain a tree of companies of the argument
 function createCompanyHTMLElement(company) {
     let li = document.createElement("li");
     
@@ -91,7 +110,7 @@ function createCompanyHTMLElement(company) {
         
         let companyEarnings = parseInt(tdCompanyEarn.innerHTML);
         let index = companyNames.indexOf(tdCompanyName.innerHTML);
-        deleteCompanyFromDatabaseAndLiTag(company._id, li, index, companyEarnings);
+        deleteCompanyFromDatabaseAndLiTag(company.id, li, index, companyEarnings);
     }
     let deleteButton = document.createElement("button");
     deleteButton.innerHTML = "DELETE";
@@ -99,7 +118,7 @@ function createCompanyHTMLElement(company) {
     tdDeleteButton.appendChild(deleteButton);
 
     function addCompany(){
-        addSubcompanyInputField(li, company._id);
+        addSubcompanyInputField(li, company.id);
     }
     let addButton = document.createElement("button");
     addButton.innerHTML = "ADD SUBCOMPANY";
@@ -149,7 +168,7 @@ function createCompanyHTMLElement(company) {
             let newCompanyEarnings = parseInt(inputCompanyEarnings.value);
             let differenceInEarnings = newCompanyEarnings - oldCompanyEarnings;
             updateCompanyInDatabaseAndItsTag(
-                company._id, newCompanyName, newCompanyEarnings, li, 
+                company.id, newCompanyName, newCompanyEarnings, li, 
                 differenceInEarnings, tdCompanyName, tdCompanyEarn,
                 saveButton, editButton, deleteButton, addButton, deleteCompany, addCompany);
         }
@@ -165,13 +184,11 @@ function createCompanyHTMLElement(company) {
     return li;
 }
 
-function deleteCompanyFromDatabaseAndLiTag(_id, liCompany, indexInCompanyNames, companyEarnings) {
-    console.log("deleting copany with id " + _id);
+function deleteCompanyFromDatabaseAndLiTag(id, liCompany, indexInCompanyNames, companyEarnings) {
     let xhttp = new XMLHttpRequest();
     xhttp.onload = function () {
         let report = JSON.parse(this.responseText);
         if (this.readyState == 4 && this.status == 200 && report.success) {
-            //console.log(this.responseText);
             let liParent = liCompany.parentElement.parentElement;
             if(liParent.tagName == "LI") {
                 updateEarningsPlusSubcompanyEarningsForParentCompanies(liParent, -companyEarnings);
@@ -179,14 +196,15 @@ function deleteCompanyFromDatabaseAndLiTag(_id, liCompany, indexInCompanyNames, 
             deleteCompanyLiTag(liCompany);
             companyNames.splice(indexInCompanyNames, 1);
         } else {
-            error.innerHTML = "<li>Failed to delete company with id = " + _id + 
-                (report.cause ? "\n\tcause: " + report.cause : "") + "</li>";
+            error.innerHTML = "<li>Failed to delete company.</li>";
+            console.error(report.cause);
         }
     }
-    xhttp.open("DELETE", "/api/company/?_id=" + _id, true);
+    xhttp.open("DELETE", "/api/company/?id=" + id, true);
     xhttp.send();
 }
 
+// Deletes a html element of a company and moving its children to its parent's children
 function deleteCompanyLiTag(liCompany) {
     let ulParent = liCompany.parentElement;
     let lastTag = liCompany.lastElementChild;
@@ -201,22 +219,16 @@ function deleteCompanyLiTag(liCompany) {
     }
 }
 
-function updateCompanyInDatabaseAndItsTag(_id, newCompanyName, newCompanyEarnings, li, 
+function updateCompanyInDatabaseAndItsTag(id, newCompanyName, newCompanyEarnings, li, 
         differenceInEarnings,tdCompanyName, tdCompanyEarn, saveButton, editButton, 
         deleteButton, addButton, deleteCompany, addCompany) {
 
-    let companyString= JSON.stringify({
-        _id,
-        name : newCompanyName,
-        earn: newCompanyEarnings
-    });
-    console.log("COMPANYSTRING BEFORE" + companyString);
     let xhttp = new XMLHttpRequest();
     xhttp.open("post", "/api/company", true);
     xhttp.setRequestHeader('Content-type','application/json');
     xhttp.onload = function () {
         let report = JSON.parse(this.responseText);
-        if (this.readyState == 4 && this.status == "200" && report.success) {
+        if (this.readyState == 4 && this.status == 200 && report.success) {
             companyNames.push(newCompanyName);
 
             deleteButton.onclick = deleteCompany;
@@ -226,55 +238,45 @@ function updateCompanyInDatabaseAndItsTag(_id, newCompanyName, newCompanyEarning
             addButton.classList.remove("non-active-button");
             addButton.onfocus = undefined;
 
-
             updateEarningsPlusSubcompanyEarningsForParentCompanies(li, differenceInEarnings);
 
             tdCompanyName.innerHTML = newCompanyName;
             tdCompanyEarn.innerHTML = newCompanyEarnings;
             saveButton.replaceWith(editButton);
         } else {
-            error.innerHTML = "<li>Failed to update company " + companyString + " to database." +
-                 (report.cause ? report.cause : "") + "</li>";
+            error.innerHTML = "<li>Failed to update company in the database.</li>";
+            console.error(report.cause); 
         }
     };
-    console.log("COMPANYSTRING AFTER" + companyString);
+    let companyString= JSON.stringify({
+        id,
+        name : newCompanyName,
+        earn: newCompanyEarnings
+    });
     xhttp.send(companyString);
 }
 
 function addCompanyToDataBaseAndAddItsTag(newCompanyId, newCompanyName, 
         newCompanyEarnings, liCompanyInput, parentCompanyId, liParentCompany) {
 
-    let companyMDB = {
-        "_id" : newCompanyId,
-        "name" : newCompanyName,
-        "earn" : newCompanyEarnings,
-        "parent_company_id" : parentCompanyId
-    };
-
-    let companyMDBString= JSON.stringify(companyMDB);
     let xhttp = new XMLHttpRequest();
     xhttp.open("put", "/api/company", true);
     xhttp.setRequestHeader('Content-type','application/json');
     xhttp.onload = function () {
-        console.log(this.responseText);
         let report = JSON.parse(this.responseText);
-        if (this.readyState == 4 && this.status == "200" && report.success) {
-            //console.log("Added company with id " + maxId + " successfully");
-            companyNames.push(companyMDB.name);
-            //console.log("Company names: " + companyNames);
+        if (this.readyState == 4 && this.status == 200 && report.success) {
+            companyNames.push(newCompanyName);
             let company = {
-                "_id" : newCompanyId,
+                "id" : newCompanyId,
                 "name" : newCompanyName,
                 "earn" : newCompanyEarnings,
                 "earn_plus_subcomp_earn" : newCompanyEarnings,
                 "subcompanies" : []
             };
 
-            console.log("liParentCompany");
-            console.log(liParentCompany);
             if(liParentCompany) {
-                console.log("Updating parent companies");
-                updateEarningsPlusSubcompanyEarningsForParentCompanies(liParentCompany, newCompanyEarnings);
+                updateEarningsPlusSubcompanyEarningsForParentCompanies(liParentCompany, 
+                    newCompanyEarnings);
             }
 
             let newLiCompany = createCompanyHTMLElement(company);
@@ -282,30 +284,29 @@ function addCompanyToDataBaseAndAddItsTag(newCompanyId, newCompanyName,
             liCompanyInput.remove();
 
         } else {
-            error.innerHTML = "<li>Failed to add company " + companyMDBString + " to database." +
-                 (report.cause ? report.cause : "") + "</li>";
+            error.innerHTML = "<li>Failed to add company to database.</li>";
+            console.error(report.cause);
         }
     };
-    xhttp.send(companyMDBString);
-    // xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    // xhttp.send("fname=Henry&lname=Ford");
+    let companySQLString = JSON.stringify({
+        "id" : newCompanyId,
+        "name" : newCompanyName,
+        "earn" : newCompanyEarnings,
+        "parent_company_id" : parentCompanyId
+    });
+    xhttp.send(companySQLString);
 }
 
 function addSubcompanyInputField(liCompany, companyId) {
     let ul = liCompany.lastElementChild;
 
-    let li = addCompanyInputField(companyId, liCompany);
+    let li = createCompanyInputField(companyId, liCompany);
 
     ul.append(li);
 }
 
-function addCompanyInputField(companyId, liCompany){
+function createCompanyInputField(companyId, liCompany){
     let li = document.createElement("li");
-    console.log("####");
-    console.log("companyID" + companyId);
-    console.log("liCompany");
-    console.log(liCompany);
-    console.log("####");
     let table = document.createElement("table");
 
     let tr1 = document.createElement("tr");
@@ -359,7 +360,8 @@ function addCompanyInputField(companyId, liCompany){
         let newCompanyName = inputCompanyName.value.trim();
         let newCompanyEarnings = parseInt(inputCompanyEarnings.value);
 
-        addCompanyToDataBaseAndAddItsTag(maxId, newCompanyName, newCompanyEarnings, li, companyId, liCompany);//companyMDB
+        addCompanyToDataBaseAndAddItsTag(maxId, newCompanyName, newCompanyEarnings, 
+            li, companyId, liCompany);
 
     };
     td23.appendChild(createCompanyButton);
@@ -367,9 +369,6 @@ function addCompanyInputField(companyId, liCompany){
     li.appendChild(table);
     return li;
 }
-
-
-
 
 function checkValidityOfInputValuesAndPrintErrorMessagesIfNeeded(inputCompanyEarnings, 
         inputCompanyName) {
@@ -393,13 +392,14 @@ function checkValidityOfInputValuesAndPrintErrorMessagesIfNeeded(inputCompanyEar
         errorMessage += "<li>Company name " + companyName + 
             " is already being used. Enter another company name.</li>";
     }
-    // if(!inputValuesAreValid) {
-    //     console.error(errorMessage);
-    // }
+    if(!inputValuesAreValid) {
+        console.error(errorMessage.replaceAll("<li>", "").replaceAll("</li>", ""));
+    }
     error.innerHTML = errorMessage;
     return inputValuesAreValid;
 }
 
+// Updates html element of the tree of companies in which liCompany element is contained
 function updateEarningsPlusSubcompanyEarningsForParentCompanies(liCompany, companyEarnings) {
     let tdLiCompanyEstimatedEarnings = liCompany.children[0].children[0].children[2];
     tdLiCompanyEstimatedEarnings.innerHTML = 

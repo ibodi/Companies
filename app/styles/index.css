@@ -1,4 +1,14 @@
 
+html {
+    height: 100%;
+}
+body {
+    height: 100%;
+    margin: 0px;
+    background-attachment: fixed;
+    background: linear-gradient(-120deg, #fdfcfb, #e2d1c3);
+}
+
 table {
     border-collapse: collapse;
 }
@@ -7,8 +17,18 @@ table, th, td {
     border: 1px solid black;
 }
 
+h1 {
+    font-family: 'Courier New', Courier, "Comic Sans MS", monospace;
+    height: 50px;
+	font-size: 30px;
+    line-height: 32.4px;
+    font-weight: bold;
+    text-align: center;
+}
+
 th, td {
     padding: 5px;
+    font-family: 'Courier New', Courier, "Comic Sans MS", monospace;
 }
 
 #error {

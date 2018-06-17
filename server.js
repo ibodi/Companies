@@ -7,6 +7,9 @@ let bodyParser = require("body-parser");
 
 let mongoUrl = "mongodb://localhost:27017/";
 
+app.use(express.static(__dirname + '/app'));
+app.use(bodyParser.json()); // this lets us receive json in REST requests
+
 /*
 // Short introduction
 
@@ -83,10 +86,6 @@ let companies = [
 // at the bottom of the file that I've written to do this job, but to 
 // try and solve this problem by yourself, or ask someone to solve it.
 */
-
-
-app.use(express.static(__dirname + '/app'));
-app.use(bodyParser.json()); // this lets us receive json in REST requests
 
 // Forward to main page with the companies.
 app.get('/', function (req, res) {

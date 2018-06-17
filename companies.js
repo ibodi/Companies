@@ -56,7 +56,7 @@ let companies = [
     }
 ];
 
-let companiesMDB = [
+let companiesSQL = [
     {
         "_id" : 1,
         "name" : "Company1",
@@ -101,7 +101,7 @@ let companiesMDB = [
     },
 ]
 
-// module.exports = { 
-//     companies,
-//     companiesMDB
-// };
+module.exports = { 
+    companies,
+    companiesSQL
+};

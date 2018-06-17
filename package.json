@@ -22,6 +22,9 @@
   "homepage": "https://github.com/ibodi/Companies#readme",
   "dependencies": {
     "body-parser": "^1.18.3",
-    "express": "^4.16.3"
+    "express": "^4.16.3",
+    "mongoose": "^5.1.5",
+    "mysql": "^2.15.0",
+    "npm": "^6.1.0"
   }
 }
