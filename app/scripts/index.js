@@ -46,7 +46,7 @@ setTimeout(() => {
             tableAddRootCompanyButton.appendChild(trAddRootCompanyButton);
 
             let addRootCompanyButton = document.createElement("button");
-            addRootCompanyButton.innerHTML = "ADD ROOT COMPANY";
+            addRootCompanyButton.innerHTML = "ADD MAIN COMPANY";
             addRootCompanyButton.onclick = ()=>{
                 let li = createCompanyInputField(null);
                 companiesHTMLElement.appendChild(li);
