@@ -1,6 +1,6 @@
 # Solution To Eliftech School Test Task
 
-This repository is a solution to task given in Eliftech School Test Task, which you can find in the file 'Eliftech School Test Task.pdf', which is located in the root of the repository.
+This repository is a solution to [Eliftech School Test Task](https://docs.google.com/document/d/120dL3A0v8EWTbetQbeFOBhWUyD4DFRLQNCQoTMW54To/edit)
 
 ### Running the app on a local machine
 
