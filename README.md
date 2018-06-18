@@ -1,6 +1,6 @@
 # Solution To Eliftech School Test Task
 
-This repository is a solution to [Eliftech School Test Task](https://docs.google.com/document/d/120dL3A0v8EWTbetQbeFOBhWUyD4DFRLQNCQoTMW54To/edit)
+This repository is a solution to [eliftech school test task](https://docs.google.com/document/d/120dL3A0v8EWTbetQbeFOBhWUyD4DFRLQNCQoTMW54To/edit)
 
 ### Running the app on a local machine
 

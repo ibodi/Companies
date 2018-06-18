@@ -9,18 +9,18 @@ String.prototype.replaceAll = function(search, replacement) {
     return target.split(search).join(replacement);
 };
 
-// Designed for containing a number which if added to one becomes an id of
-// newly created company.
+// Designed for containing a number, which, if added to one, becomes an id of
+// newly created company
 let maxId;
 
 // Designed for containing all company names so that we could prevent
 // adding a company with already used name or replacing a company name
-// with already used name.
+// with already used name
 let companyNames = [];
 
 // This will be executed after the page is loaded for 
 // taking data from the database and drawing the list of trees of companies
-// might take some time 
+// might take some time
 setTimeout(() => {
     let xhttp = new XMLHttpRequest();
     xhttp.onload = function() {
@@ -41,6 +41,7 @@ setTimeout(() => {
     xhttp.send();
 }, 0);
 
+// Creates list with all the companies
 function createListElement(companies) {
     let companiesHTMLElement = createCompaniesHTMLElement(companies);
 
@@ -68,7 +69,7 @@ function createListElement(companies) {
     container.appendChild(companiesHTMLElement);
 }
 
-function dropAndCreateDatabaseWithMockData() {
+function replaceAllRowsInCompanyTableWithMockData() {
     let xhttp = new XMLHttpRequest();
     xhttp.onload = function () {
         let report = JSON.parse(this.responseText);
@@ -113,7 +114,8 @@ function updateCompanyNames(companies) {
     }
 }
 
-// Creates ul element, which is designed to contain a list of trees of companies of the argument array
+// Creates ul element, which is designed to contain a list of trees of companies of the 
+// argument array
 function createCompaniesHTMLElement(companies) {
     let ul = document.createElement("ul");
     for(let company of companies) {
@@ -200,7 +202,7 @@ function createCompanyHTMLElement(company) {
         saveButton.onclick = ()=>{
             let inputValuesAreValid = 
                 checkValidityOfInputValuesAndPrintErrorMessagesIfNeeded(
-                                            inputCompanyEarnings, inputCompanyName);
+                                        inputCompanyEarnings, inputCompanyName);
             if(!inputValuesAreValid) {
                 return;
             }
@@ -211,7 +213,8 @@ function createCompanyHTMLElement(company) {
             updateCompanyInDatabaseAndItsTag(
                 company.id, newCompanyName, newCompanyEarnings, li, 
                 differenceInEarnings, tdCompanyName, tdCompanyEarn,
-                saveButton, editButton, deleteButton, addButton, deleteCompany, addCompany);
+                saveButton, editButton, deleteButton, addButton, 
+                deleteCompany, addCompany);
         }
         editButton.replaceWith(saveButton);
 
@@ -225,14 +228,17 @@ function createCompanyHTMLElement(company) {
     return li;
 }
 
-function deleteCompanyFromDatabaseAndLiTag(id, liCompany, indexInCompanyNames, companyEarnings) {
+function deleteCompanyFromDatabaseAndLiTag(id, liCompany, 
+            indexInCompanyNames, companyEarnings) {
+
     let xhttp = new XMLHttpRequest();
     xhttp.onload = function () {
         let report = JSON.parse(this.responseText);
         if (this.readyState == 4 && this.status == 200 && report.success) {
             let liParent = liCompany.parentElement.parentElement;
             if(liParent.tagName == "LI") {
-                updateEarningsPlusSubcompanyEarningsForParentCompanies(liParent, -companyEarnings);
+                updateEarningsPlusSubcompanyEarningsForParentCompanies(liParent, 
+                    -companyEarnings);
             }
             deleteCompanyLiTag(liCompany);
             companyNames.splice(indexInCompanyNames, 1);

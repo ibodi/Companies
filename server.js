@@ -8,8 +8,6 @@ let config = require("./config.json");
 let child_process = require('child_process');
 let companiesSQL = require("./mock-companies.json");
 
-let companiesSQLAreRead = false;
-
 let con = mysql.createConnection(config.mysql_connection);
 
 app.use(express.static(__dirname + '/app'));
@@ -18,8 +16,7 @@ app.use(bodyParser.json()); // this lets us receive json in REST requests
 /*
 // Short introduction
 
-// I am going to use mongodb database while solving this task.
-// Both the database and the collection we are going to use are named "companies".
+// I am going to use MySQL database while solving this task.
 
 // Data in the database is represented in format like the commented variable companiesSQL 
 // below. Let us call it Format A.
@@ -222,7 +219,7 @@ app.put('/api/company', function (req, res) {
     });
 });
 
-// Updates company in the database // 
+// Updates company in the database
 app.post('/api/company', function (req, res) {
     
     let { name , earn, id } = req.body;
