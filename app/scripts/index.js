@@ -24,45 +24,86 @@ let companyNames = [];
 setTimeout(() => {
     let xhttp = new XMLHttpRequest();
     xhttp.onload = function() {
-        if (this.readyState == 4 && this.status == 200) {
-            let report = JSON.parse(this.responseText);
-            if(!report.success) {
-                error.innerHTML = "<li>Failed to load companies tree.</li>";
-                console.error(report.cause);
-                return;
-            }
+        let report = JSON.parse(this.responseText);
+        if (this.readyState == 4 && this.status == 200 && report.success) {
             maxId = report.maxId;
             let companies = report.companies;
             updateCompanyNames(companies);
 
-            let companiesHTMLElement = createCompaniesHTMLElement(companies);
-
-            let liAddRootCompanyButton = document.createElement("li");
-
-            let tableAddRootCompanyButton = document.createElement("table");
-            let trAddRootCompanyButton = document.createElement("tr");
-            let tdAddRootCompanyButton = document.createElement("td");
-            trAddRootCompanyButton.appendChild(tdAddRootCompanyButton);
-            tableAddRootCompanyButton.appendChild(trAddRootCompanyButton);
-
-            let addRootCompanyButton = document.createElement("button");
-            addRootCompanyButton.innerHTML = "ADD MAIN COMPANY";
-            addRootCompanyButton.onclick = ()=>{
-                let li = createCompanyInputField(null);
-                companiesHTMLElement.appendChild(li);
-            };
-
-            tdAddRootCompanyButton.appendChild(addRootCompanyButton);
-            liAddRootCompanyButton.appendChild(tableAddRootCompanyButton);
-
-            companiesHTMLElement.prepend(liAddRootCompanyButton)
+            createListElement(companies);
             
-            container.appendChild(companiesHTMLElement);
+        } else {
+            error.innerHTML = "<li>Failed to load companies tree.</li>";
+            console.error(report.cause);
         }
     };
     xhttp.open("GET", "/api/companies", true);
     xhttp.send();
 }, 0);
+
+function createListElement(companies) {
+    let companiesHTMLElement = createCompaniesHTMLElement(companies);
+
+    let liAddRootCompanyButton = document.createElement("li");
+
+    let tableAddRootCompanyButton = document.createElement("table");
+    let trAddRootCompanyButton = document.createElement("tr");
+    let tdAddRootCompanyButton = document.createElement("td");
+    trAddRootCompanyButton.appendChild(tdAddRootCompanyButton);
+    tableAddRootCompanyButton.appendChild(trAddRootCompanyButton);
+
+    let addRootCompanyButton = document.createElement("button");
+    addRootCompanyButton.innerHTML = "ADD MAIN COMPANY";
+    addRootCompanyButton.onclick = ()=>{
+        let li = createCompanyInputField(null);
+        companiesHTMLElement.appendChild(li);
+    };
+
+    tdAddRootCompanyButton.appendChild(addRootCompanyButton);
+    liAddRootCompanyButton.appendChild(tableAddRootCompanyButton);
+
+    companiesHTMLElement.prepend(liAddRootCompanyButton);
+    
+    container.innerHTML = "";
+    container.appendChild(companiesHTMLElement);
+}
+
+function dropAndCreateDatabaseWithMockData() {
+    let xhttp = new XMLHttpRequest();
+    xhttp.onload = function () {
+        let report = JSON.parse(this.responseText);
+        if (this.readyState == 4 && this.status == 200 && report.success) {
+            maxId = report.maxId;
+            let companies = report.companies;
+            createListElement(companies);
+
+            let companyNames = [];
+            updateCompanyNames(companies);
+        } else {
+            error.innerHTML = "<li>Failed to drop the database and create a new one with mock data.</li>";
+            console.error(report.cause);
+        }
+    }
+    xhttp.open("POST", "/api/companies", true);
+    xhttp.send();
+}
+
+function deleteAllValuesInCompaniesTable() {
+    let xhttp = new XMLHttpRequest();
+    xhttp.onload = function () {
+        let report = JSON.parse(this.responseText);
+        if (this.readyState == 4 && this.status == 200 && report.success) {
+            maxId = 1;
+            companyNames = [];
+            createListElement([]);
+        } else {
+            error.innerHTML = "<li>Failed to delete all companies.</li>";
+            console.error(report.cause);
+        }
+    }
+    xhttp.open("DELETE", "/api/companies", true);
+    xhttp.send();
+}
 
 // Adds company names to array companyNames
 function updateCompanyNames(companies) {

@@ -1,0 +1,44 @@
+[
+    {
+        "id" : 1,
+        "name" : "Company1",
+        "earn" : 25000,
+        "parent_company_id" : null
+    },
+    {
+        "id" : 2,
+        "name" : "Company2",
+        "earn" : 13000,
+        "parent_company_id" : 1
+    },
+    {
+        "id" : 3,
+        "name" : "Company3",
+        "earn" : 5000,
+        "parent_company_id" : 2
+    },
+    {
+        "id" : 4,
+        "name" : "Company4",
+        "earn" : 10000,
+        "parent_company_id" : 1
+    },
+    {
+        "id" : 5,
+        "name" : "Company5",
+        "earn" : 10000,
+        "parent_company_id" : null
+    },
+    {
+        "id" : 6,
+        "name" : "Company6",
+        "earn" : 15000,
+        "parent_company_id" : 5
+    },
+    {
+        "id" : 7,
+        "name" : "Company7",
+        "earn" : 5000,
+        "parent_company_id" : 5
+    }
+]

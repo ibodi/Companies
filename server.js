@@ -3,15 +3,14 @@
 let express = require('express');
 let app = express();
 let bodyParser = require("body-parser");
+let mysql = require('mysql');
+let config = require("./config.json");
+let child_process = require('child_process');
+let companiesSQL = require("./mock-companies.json");
 
-var mysql = require('mysql');
+let companiesSQLAreRead = false;
 
-var con = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "Biedronka2017",
-    database: "companies"
-});
+let con = mysql.createConnection(config.mysql_connection);
 
 app.use(express.static(__dirname + '/app'));
 app.use(bodyParser.json()); // this lets us receive json in REST requests
@@ -93,7 +92,7 @@ let companies = [
 // try and solve this problem by yourself, or ask someone to solve it.
 */
 
-// Forward to main page with companies.
+// Forwards to main page with companies.
 app.get('/', function (req, res) {
    res.sendFile(__dirname + "/app/index.html");
 });
@@ -101,6 +100,7 @@ app.get('/', function (req, res) {
 app.get('/api/companies', function (req, res) {
     con.query("select * from companies", function (err, companiesSQL) {
         if (err) {
+            console.log(JSON.stringify(err));
             logErrorAndSendReport(err, res);
             return;
         };
@@ -119,7 +119,60 @@ app.get('/api/companies', function (req, res) {
     });
 });
 
-// Delete the company from the database
+// Deletes all the data from the companies table
+app.delete('/api/companies', function (req, res) {
+    con.query("delete from companies", function (err, result) {
+        if (err) {
+            logErrorAndSendReport(err, res);
+            return;
+        }
+
+        res.send({
+            success: true
+        });
+    });
+});
+
+// Drops the database and creates it and a table of companies again, and inserts mock data 
+// from mock-companies.json into the table
+app.post("/api/companies", function (req, res) {
+    con.query("delete from companies", function (err, result) {
+        if (err) {
+            logErrorAndSendReport(err, res);
+            return;
+        }
+        let values = [];
+        let maxId = 1;
+        for(let companySQL of companiesSQL) {
+            if(maxId < companySQL.id) {
+                maxId = companySQL.id
+            }
+            values.push([
+                companySQL.id,
+                companySQL.name,
+                companySQL.earn,
+                companySQL.parent_company_id
+            ]);
+        }
+
+        let insertDbQuery = "INSERT INTO companies VALUES ?";
+        con.query(insertDbQuery, [values], function (err, result) {
+            if (err) {
+                logErrorAndSendReport(err, res);
+                return;
+            }
+
+            let companies = companiesSQLTransform(companiesSQL);
+            res.send({
+                success: true,
+                companies,
+                maxId
+            });
+        });
+    });
+});
+
+// Deletes the company from the database
 app.delete('/api/company', function (req, res) {
     let id = parseInt(req.query.id);
     
@@ -147,7 +200,7 @@ app.delete('/api/company', function (req, res) {
     });
 });
 
-// Add company to the database
+// Adds company to the database
 app.put('/api/company', function (req, res) {
 
     let company = req.body;
@@ -169,7 +222,7 @@ app.put('/api/company', function (req, res) {
     });
 });
 
-// Update company in the database // 
+// Updates company in the database // 
 app.post('/api/company', function (req, res) {
     
     let { name , earn, id } = req.body;
@@ -185,12 +238,12 @@ app.post('/api/company', function (req, res) {
     });
 });
 
-// Forward to 404 page
+// Forwards to 404 page
 app.get("/*", function (req, res) {
     res.sendFile(__dirname + "/app/html/404.html");
 });
 
-app.listen(8081);
+app.listen(config.port, ()=>console.log("Server started"));
 
 function logErrorAndSendReport(err, res) {
     console.error(err.stack);
@@ -201,7 +254,8 @@ function logErrorAndSendReport(err, res) {
 }
 
 // Transforms data from Format A to Format B.
-function companiesSQLTransform(companiesSQL) {
+function companiesSQLTransform(companiesSQL_) {
+    let companiesSQL = JSON.parse(JSON.stringify(companiesSQL_));
     let result = [];
     let helpCompanies = {};
 

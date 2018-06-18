@@ -43,3 +43,15 @@ th, td {
 p {
     margin: 5%;
 }
+
+#container {
+    /* width: 100%;
+    text-align: center; */
+    display: flex;
+    justify-content: center;
+}
+
+#drop-and-create-database-container {
+    display: flex;
+    justify-content: center;
+}
