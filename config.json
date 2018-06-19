@@ -3,7 +3,7 @@
     "mysql_connection": {
         "host": "localhost",
         "user": "root",
-        "password": "Biedronka2017",
+        "password": "password",
         "database": "eliftech_school_test_companies"
     }
 }

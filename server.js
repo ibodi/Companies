@@ -1,14 +1,14 @@
 "use strict"
 
-let express = require('express');
-let app = express();
-let bodyParser = require("body-parser");
-let mysql = require('mysql');
-let config = require("./config.json");
-let child_process = require('child_process');
-let companiesSQL = require("./mock-companies.json");
+const express = require('express');
+const app = express();
+const bodyParser = require("body-parser");
+const mysql = require('mysql');
+const config = require("./config.json");
+const child_process = require('child_process');
+const companiesSQL = require("./mock-companies.json");
 
-let con = mysql.createConnection(config.mysql_connection);
+const con = mysql.createConnection(config.mysql_connection);
 
 app.use(express.static(__dirname + '/app'));
 app.use(bodyParser.json()); // this lets us receive json in REST requests

@@ -2,7 +2,7 @@
 
 This repository is a solution to [eliftech school test task](https://docs.google.com/document/d/120dL3A0v8EWTbetQbeFOBhWUyD4DFRLQNCQoTMW54To/edit).
 
-### Running the app on a local machine
+## Running the app on a local machine
 
 In order to run the app for the first time on your local machine you have to do the following steps:
 
