@@ -2,15 +2,10 @@
 
 const express = require('express');
 const app = express();
-// const path = require('path');
 const bodyParser = require("body-parser");
-// const mysql = require('mysql');
 const config = require("./config.json");
-// const child_process = require('child_process');
 const companiesSQL = require("./mock-companies.json");
 const PORT = process.env.PORT || 5000;
-
-// const con = mysql.createConnection(config.mysql_connection);
 
 const { Pool } = require('pg');
 const pool = new Pool({
@@ -25,7 +20,7 @@ app.use(bodyParser.json()); // this lets us receive json in REST requests
 /*
 // Short introduction
 
-// I am going to use MySQL database while solving this task.
+// I am going to use PostgreSQL database while solving this task.
 
 // Data in the database is represented in format like the commented variable companiesSQL 
 // below. Let us call it Format A.
@@ -100,34 +95,10 @@ let companies = [
 
 // Forwards to main page with companies.
 app.get('/', function (req, res) {
-//    res.sendFile(__dirname + "/app/index.html");
-    console.error("HERE I AM")
-    res.render("index");
-
-    
+    res.render("index");   
 });
 
 app.get('/createdb', async (req, res) => {
-    // con.query("select * from companies", function (err, companiesSQL) {
-    //     if (err) {
-    //         console.log(JSON.stringify(err));
-    //         logErrorAndSendReport(err, res);
-    //         return;
-    //     };
-    //     let companies = companiesSQLTransform(companiesSQL);
-    //     con.query("select max(id) from companies", function(err, maxId){
-    //         if (err) {
-    //             logErrorAndSendReport(err, res);
-    //             return;
-    //         }
-    //         res.send({
-    //             success: true,
-    //             companies,
-    //             maxId: maxId.length == 0 ? 1 : maxId[0]["max(id)"]
-    //         });
-    //     });
-    // });
-
     try {
         const client = await pool.connect();
         const result = await client.query("drop TABLE if exists companies");
@@ -139,8 +110,6 @@ app.get('/createdb', async (req, res) => {
             PRIMARY KEY (id)
         )`; // DEFAULT CHARSET=utf8 // :,(
         const result2 = await client.query(createTableQuery);
-        console.log("drop table RESULT:" + JSON.stringify(result, null, 2));
-        console.log("create table RESULT:" + JSON.stringify(result2, null, 2));
         client.release();
         res.send(result);
     } catch (err) {
@@ -149,27 +118,7 @@ app.get('/createdb', async (req, res) => {
 });
 
 app.get('/api/companies', async function (req, res) {
-    // con.query("select * from companies", function (err, companiesSQL) {
-    //     if (err) {
-    //         console.log(JSON.stringify(err));
-    //         logErrorAndSendReport(err, res);
-    //         return;
-    //     };
-    //     let companies = companiesSQLTransform(companiesSQL);
-    //     con.query("select max(id) from companies", function(err, maxId){
-    //         if (err) {
-    //             logErrorAndSendReport(err, res);
-    //             return;
-    //         }
-    //         res.send({
-    //             success: true,
-    //             companies,
-    //             maxId: maxId.length == 0 ? 1 : maxId[0]["max(id)"]
-    //         });
-    //     });
-    // });
     try {
-        console.log("I AM HERE IN API COMPANIES");
         const client = await pool.connect();
         const result1 = await client.query('select * from companies');
         const result2 = await client.query("select max(id) from companies");
@@ -177,10 +126,7 @@ app.get('/api/companies', async function (req, res) {
         const {rows : [ { max : maxId } ]} = result2;
 
         client.release();
-        // console.log("result1" + JSON.stringify(result1, null, 2));
-        // console.log("result2" + JSON.stringify(result2, null, 2));
-        // console.log("companiesSQL" + JSON.stringify(companiesSQL, null, 2));
-        // console.log("maxId" + maxId);
+        
         let companies = companiesSQLTransform(companiesSQL);
         res.send({
             success: true,
@@ -240,29 +186,6 @@ app.post("/api/companies", async function (req, res) {
 // Deletes the company from the database
 app.delete('/api/company', async function (req, res) {
     let id = parseInt(req.query.id);
-    
-    // con.query("select parent_company_id from companies where id = " + id + ";", function (err, result){
-    //     if (err) {
-    //         logErrorAndSendReport(err, res);
-    //         return;
-    //     }
-    //     let parent_company_id = result[0].parent_company_id;
-    //     con.query("delete from companies where id = " + id + ";", function(err, result){
-    //         if (err) {
-    //             logErrorAndSendReport(err, res);
-    //             return;
-    //         }
-    //         con.query("update companies set parent_company_id = " + parent_company_id + " where parent_company_id = " + id + ";", function (err, result) {
-    //             if (err) {
-    //                 logErrorAndSendReport(err, res);
-    //                 return;
-    //             }
-    //             res.send({
-    //                 success: true
-    //             });
-    //         });
-    //     });
-    // });
     try {
         const client = await pool.connect();
         const result1 = await client.query("select parent_company_id from companies where id = " + id);
@@ -302,8 +225,7 @@ app.put('/api/company', async function (req, res) {
 });
 
 // Updates company in the database
-app.post('/api/company', async function (req, res) {
-    
+app.post('/api/company', async function (req, res) {   
     let { name , earn, id } = req.body;
     try {
         const client = await pool.connect();
