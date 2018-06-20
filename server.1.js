@@ -32,17 +32,6 @@ app.use(bodyParser.json()); // this lets us receive json in REST requests
 //     PRIMARY KEY (id)
 // ) DEFAULT CHARSET=utf8`
 
-let createTableQuery = `CREATE TABLE companies (
-    id INT
-)`
-
-(async () => {
-    const client = await pool.connect();
-    const result = await client.query(createTableQuery);
-    console.log("CREATE DB RESULT:" + JSON.stringify(result, null, 2));
-    client.release();
-})();
-
 
 /*
 // Short introduction
@@ -127,6 +116,38 @@ app.get('/', function (req, res) {
     res.render("index");
 
     
+});
+
+app.get('/createdb', async (req, res) => {
+    // con.query("select * from companies", function (err, companiesSQL) {
+    //     if (err) {
+    //         console.log(JSON.stringify(err));
+    //         logErrorAndSendReport(err, res);
+    //         return;
+    //     };
+    //     let companies = companiesSQLTransform(companiesSQL);
+    //     con.query("select max(id) from companies", function(err, maxId){
+    //         if (err) {
+    //             logErrorAndSendReport(err, res);
+    //             return;
+    //         }
+    //         res.send({
+    //             success: true,
+    //             companies,
+    //             maxId: maxId.length == 0 ? 1 : maxId[0]["max(id)"]
+    //         });
+    //     });
+    // });
+
+    try {
+        const client = await pool.connect();
+        const result = await client.query("CREATE TABLE companies (id INT)");
+        console.log("CREATE DB RESULT:" + JSON.stringify(result, null, 2));
+        client.release();
+        res.send(result);
+    } catch (err) {
+        logErrorAndSendReport(err, res);
+    }
 });
 
 app.get('/api/companies', async function (req, res) {
