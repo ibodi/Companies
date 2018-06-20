@@ -174,10 +174,15 @@ app.get('/api/companies', async function (req, res) {
     try {
         console.log("I AM HERE IN API COMPANIES");
         const client = await pool.connect();
-        const {rows : companiesSQL} = await client.query('select * from companies');
-        const {rows : [ { max : maxId } ]} = await client.query("select max(id) from companies");
+        const result1 = await client.query('select * from companies');
+        const result2 = await client.query("select max(id) from companies");
+        const {rows : companiesSQL} = result1;
+        const {rows : [ { max : maxId } ]} = result2;
+
         client.release();
-        console.log("companiesSQL" + JSON.stringify(companiesSQL));
+        console.log("result1" + JSON.stringify(result1, null, 2));
+        console.log("result2" + JSON.stringify(result2, null, 2));
+        console.log("companiesSQL" + JSON.stringify(companiesSQL, null, 2));
         console.log("maxId" + maxId);
         let companies = companiesSQLTransform(companiesSQL);
         res.send({

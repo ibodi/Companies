@@ -1,22 +1,14 @@
 "use strict"
 
 
-setTimeout(() => {
-    let xhttp = new XMLHttpRequest();
-    xhttp.onload = function() {
-        console.log(this.responseText)
-    };
-    xhttp.open("GET", "/createdb", true);
-    xhttp.send();
-}, 0);
-
-
-
-
-
-
-
-
+// setTimeout(() => {
+//     let xhttp = new XMLHttpRequest();
+//     xhttp.onload = function() {
+//         console.log(this.responseText)
+//     };
+//     xhttp.open("GET", "/createdb", true);
+//     xhttp.send();
+// }, 0);
 
 
 Array.prototype.contains = function (value) {
@@ -40,25 +32,25 @@ let companyNames = [];
 // This will be executed after the page is loaded for 
 // taking data from the database and drawing the list of trees of companies
 // might take some time
-// setTimeout(() => {
-//     let xhttp = new XMLHttpRequest();
-//     xhttp.onload = function() {
-//         let report = JSON.parse(this.responseText);
-//         if (this.readyState == 4 && this.status == 200 && report.success) {
-//             maxId = report.maxId;
-//             let companies = report.companies;
-//             updateCompanyNames(companies);
+setTimeout(() => {
+    let xhttp = new XMLHttpRequest();
+    xhttp.onload = function() {
+        let report = JSON.parse(this.responseText);
+        if (this.readyState == 4 && this.status == 200 && report.success) {
+            maxId = report.maxId;
+            let companies = report.companies;
+            updateCompanyNames(companies);
 
-//             createListElement(companies);
+            createListElement(companies);
             
-//         } else {
-//             error.innerHTML = "<li>Failed to load companies tree.</li>";
-//             console.error(report.cause);
-//         }
-//     };
-//     xhttp.open("GET", "/api/companies", true);
-//     xhttp.send();
-// }, 0);
+        } else {
+            error.innerHTML = "<li>Failed to load companies tree.</li>";
+            console.error(report.cause);
+        }
+    };
+    xhttp.open("GET", "/api/companies", true);
+    xhttp.send();
+}, 0);
 
 // Creates list with all the companies
 function createListElement(companies) {
