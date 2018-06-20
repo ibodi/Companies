@@ -18,8 +18,6 @@ const pool = new Pool({
   ssl: true
 });
 
-
-
 app.use(express.static(__dirname + '/app'));
 app.use(bodyParser.json()); // this lets us receive json in REST requests
 
@@ -139,7 +137,7 @@ app.get('/createdb', async (req, res) => {
             earn INT NOT NULL,
             parent_company_id INT,
             PRIMARY KEY (id)
-        ) DEFAULT CHARSET=utf8`
+        ) DEFAULT CHARSET=utf8`;
         const result = await client.query(createTableQuery);
         console.log("CREATE DB RESULT:" + JSON.stringify(result, null, 2));
         client.release();
