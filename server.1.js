@@ -215,6 +215,7 @@ app.post("/api/companies", async function (req, res) {
         const client = await pool.connect();
         await client.query('delete from companies');
 
+        let maxId = 1;
         for(let companySQL of companiesSQL) {
             if(maxId < companySQL.id) {
                 maxId = companySQL.id
