@@ -190,124 +190,124 @@ app.get('/api/companies', async function (req, res) {
     }
 });
 
-// Deletes all the data from the companies table
-app.delete('/api/companies', function (req, res) {
-    con.query("delete from companies", function (err, result) {
-        if (err) {
-            logErrorAndSendReport(err, res);
-            return;
-        }
+// // Deletes all the data from the companies table
+// app.delete('/api/companies', function (req, res) {
+//     con.query("delete from companies", function (err, result) {
+//         if (err) {
+//             logErrorAndSendReport(err, res);
+//             return;
+//         }
 
-        res.send({
-            success: true
-        });
-    });
-});
+//         res.send({
+//             success: true
+//         });
+//     });
+// });
 
-// Drops the database and creates it and a table of companies again, and inserts mock data 
-// from mock-companies.json into the table
-app.post("/api/companies", function (req, res) {
-    con.query("delete from companies", function (err, result) {
-        if (err) {
-            logErrorAndSendReport(err, res);
-            return;
-        }
-        let values = [];
-        let maxId = 1;
-        for(let companySQL of companiesSQL) {
-            if(maxId < companySQL.id) {
-                maxId = companySQL.id
-            }
-            values.push([
-                companySQL.id,
-                companySQL.name,
-                companySQL.earn,
-                companySQL.parent_company_id
-            ]);
-        }
+// // Drops the database and creates it and a table of companies again, and inserts mock data 
+// // from mock-companies.json into the table
+// app.post("/api/companies", function (req, res) {
+//     con.query("delete from companies", function (err, result) {
+//         if (err) {
+//             logErrorAndSendReport(err, res);
+//             return;
+//         }
+//         let values = [];
+//         let maxId = 1;
+//         for(let companySQL of companiesSQL) {
+//             if(maxId < companySQL.id) {
+//                 maxId = companySQL.id
+//             }
+//             values.push([
+//                 companySQL.id,
+//                 companySQL.name,
+//                 companySQL.earn,
+//                 companySQL.parent_company_id
+//             ]);
+//         }
 
-        let insertDbQuery = "INSERT INTO companies VALUES ?";
-        con.query(insertDbQuery, [values], function (err, result) {
-            if (err) {
-                logErrorAndSendReport(err, res);
-                return;
-            }
+//         let insertDbQuery = "INSERT INTO companies VALUES ?";
+//         con.query(insertDbQuery, [values], function (err, result) {
+//             if (err) {
+//                 logErrorAndSendReport(err, res);
+//                 return;
+//             }
 
-            let companies = companiesSQLTransform(companiesSQL);
-            res.send({
-                success: true,
-                companies,
-                maxId
-            });
-        });
-    });
-});
+//             let companies = companiesSQLTransform(companiesSQL);
+//             res.send({
+//                 success: true,
+//                 companies,
+//                 maxId
+//             });
+//         });
+//     });
+// });
 
-// Deletes the company from the database
-app.delete('/api/company', function (req, res) {
-    let id = parseInt(req.query.id);
+// // Deletes the company from the database
+// app.delete('/api/company', function (req, res) {
+//     let id = parseInt(req.query.id);
     
-    con.query("select parent_company_id from companies where id = " + id + ";", function (err, result){
-        if (err) {
-            logErrorAndSendReport(err, res);
-            return;
-        }
-        let parent_company_id = result[0].parent_company_id;
-        con.query("delete from companies where id = " + id + ";", function(err, result){
-            if (err) {
-                logErrorAndSendReport(err, res);
-                return;
-            }
-            con.query("update companies set parent_company_id = " + parent_company_id + " where parent_company_id = " + id + ";", function (err, result) {
-                if (err) {
-                    logErrorAndSendReport(err, res);
-                    return;
-                }
-                res.send({
-                    success: true
-                });
-            });
-        });
-    });
-});
+//     con.query("select parent_company_id from companies where id = " + id + ";", function (err, result){
+//         if (err) {
+//             logErrorAndSendReport(err, res);
+//             return;
+//         }
+//         let parent_company_id = result[0].parent_company_id;
+//         con.query("delete from companies where id = " + id + ";", function(err, result){
+//             if (err) {
+//                 logErrorAndSendReport(err, res);
+//                 return;
+//             }
+//             con.query("update companies set parent_company_id = " + parent_company_id + " where parent_company_id = " + id + ";", function (err, result) {
+//                 if (err) {
+//                     logErrorAndSendReport(err, res);
+//                     return;
+//                 }
+//                 res.send({
+//                     success: true
+//                 });
+//             });
+//         });
+//     });
+// });
 
-// Adds company to the database
-app.put('/api/company', function (req, res) {
+// // Adds company to the database
+// app.put('/api/company', function (req, res) {
 
-    let company = req.body;
+//     let company = req.body;
 
-    let newRow = [[[
-        company.id,
-        company.name,
-        company.earn,
-        company.parent_company_id
-    ]]];
-    con.query("insert into companies values ?;", newRow, function (err, result) {
-        if(err) {
-            logErrorAndSendReport(err, res);
-            return;
-        }
-        res.send({
-            success: true,
-        });
-    });
-});
+//     let newRow = [[[
+//         company.id,
+//         company.name,
+//         company.earn,
+//         company.parent_company_id
+//     ]]];
+//     con.query("insert into companies values ?;", newRow, function (err, result) {
+//         if(err) {
+//             logErrorAndSendReport(err, res);
+//             return;
+//         }
+//         res.send({
+//             success: true,
+//         });
+//     });
+// });
 
-// Updates company in the database
-app.post('/api/company', function (req, res) {
+// // Updates company in the database
+// app.post('/api/company', function (req, res) {
     
-    let { name , earn, id } = req.body;
-    con.query("UPDATE companies SET name = \"" + name + "\", earn = " + earn +
-             " WHERE id = " + id + ";", function (err, result) {
-        if(err) {
-            logErrorAndSendReport(err, res);
-            return;
-        }
-        res.send({
-            success: true,
-        });
-    });
-});
+//     let { name , earn, id } = req.body;
+//     con.query("UPDATE companies SET name = \"" + name + "\", earn = " + earn +
+//              " WHERE id = " + id + ";", function (err, result) {
+//         if(err) {
+//             logErrorAndSendReport(err, res);
+//             return;
+//         }
+//         res.send({
+//             success: true,
+//         });
+//     });
+// });
 
 // Forwards to 404 page
 app.get("/*", function (req, res) {
