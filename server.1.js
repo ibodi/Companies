@@ -137,7 +137,7 @@ app.get('/createdb', async (req, res) => {
             earn INT NOT NULL,
             parent_company_id INT,
             PRIMARY KEY (id)
-        ) DEFAULT CHARSET=utf8`;
+        )`; // DEFAULT CHARSET=utf8 // :,(
         const result2 = await client.query(createTableQuery);
         console.log("drop table RESULT:" + JSON.stringify(result, null, 2));
         console.log("create table RESULT:" + JSON.stringify(result2, null, 2));
