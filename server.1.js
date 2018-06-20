@@ -170,7 +170,6 @@ app.get('/api/companies', async function (req, res) {
     //         });
     //     });
     // });
-
     try {
         console.log("I AM HERE IN API COMPANIES");
         const client = await pool.connect();
@@ -180,10 +179,10 @@ app.get('/api/companies', async function (req, res) {
         const {rows : [ { max : maxId } ]} = result2;
 
         client.release();
-        console.log("result1" + JSON.stringify(result1, null, 2));
-        console.log("result2" + JSON.stringify(result2, null, 2));
-        console.log("companiesSQL" + JSON.stringify(companiesSQL, null, 2));
-        console.log("maxId" + maxId);
+        // console.log("result1" + JSON.stringify(result1, null, 2));
+        // console.log("result2" + JSON.stringify(result2, null, 2));
+        // console.log("companiesSQL" + JSON.stringify(companiesSQL, null, 2));
+        // console.log("maxId" + maxId);
         let companies = companiesSQLTransform(companiesSQL);
         res.send({
             success: true,
@@ -196,29 +195,26 @@ app.get('/api/companies', async function (req, res) {
 });
 
 // Deletes all the data from the companies table
-app.delete('/api/companies', function (req, res) {
-    con.query("delete from companies", function (err, result) {
-        if (err) {
-            logErrorAndSendReport(err, res);
-            return;
-        }
-
+app.delete('/api/companies', async function (req, res) {
+    try {
+        const client = await pool.connect();
+        await client.query('delete from companies');
+        client.release();
         res.send({
             success: true
         });
-    });
+    } catch (err) {
+        logErrorAndSendReport(err, res);
+    }
 });
 
 // Drops the database and creates it and a table of companies again, and inserts mock data 
 // from mock-companies.json into the table
-app.post("/api/companies", function (req, res) {
-    con.query("delete from companies", function (err, result) {
-        if (err) {
-            logErrorAndSendReport(err, res);
-            return;
-        }
-        let values = [];
-        let maxId = 1;
+app.post("/api/companies", async function (req, res) {
+    try {
+        const client = await pool.connect();
+        await client.query('delete from companies');
+
         for(let companySQL of companiesSQL) {
             if(maxId < companySQL.id) {
                 maxId = companySQL.id
@@ -230,22 +226,19 @@ app.post("/api/companies", function (req, res) {
                 companySQL.parent_company_id
             ]);
         }
-
         let insertDbQuery = "INSERT INTO companies VALUES ?";
-        con.query(insertDbQuery, [values], function (err, result) {
-            if (err) {
-                logErrorAndSendReport(err, res);
-                return;
-            }
+        await client.query(insertDbQuery, values);
 
-            let companies = companiesSQLTransform(companiesSQL);
-            res.send({
-                success: true,
-                companies,
-                maxId
-            });
+        client.release();
+        let companies = companiesSQLTransform(companiesSQL);
+        res.send({
+            success: true,
+            companies,
+            maxId
         });
-    });
+    } catch (err) {
+        logErrorAndSendReport(err, res);
+    }
 });
 
 // Deletes the company from the database
