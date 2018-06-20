@@ -138,8 +138,9 @@ app.get('/createdb', async (req, res) => {
             parent_company_id INT,
             PRIMARY KEY (id)
         ) DEFAULT CHARSET=utf8`;
-        const result = await client.query(createTableQuery);
-        console.log("CREATE DB RESULT:" + JSON.stringify(result, null, 2));
+        const result2 = await client.query(createTableQuery);
+        console.log("drop table RESULT:" + JSON.stringify(result, null, 2));
+        console.log("create table RESULT:" + JSON.stringify(result2, null, 2));
         client.release();
         res.send(result);
     } catch (err) {
