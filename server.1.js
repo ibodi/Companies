@@ -130,7 +130,7 @@ app.get('/createdb', async (req, res) => {
 
     try {
         const client = await pool.connect();
-        const result = await client.query("drop TABLE companies");
+        const result = await client.query("drop TABLE if exists companies");
         let createTableQuery = `CREATE TABLE companies (
             id INT NOT NULL,
             name varchar(255) NOT NULL UNIQUE,
