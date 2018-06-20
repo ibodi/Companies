@@ -24,13 +24,17 @@ app.use(express.static(__dirname + '/app'));
 app.use(bodyParser.json()); // this lets us receive json in REST requests
 
 
+// let createTableQuery = `CREATE TABLE companies (
+//     id INT NOT NULL,
+//     name varchar(255) NOT NULL UNIQUE,
+//     earn INT NOT NULL,
+//     parent_company_id INT,
+//     PRIMARY KEY (id)
+// ) DEFAULT CHARSET=utf8`
+
 let createTableQuery = `CREATE TABLE companies (
-    id INT NOT NULL,
-    name varchar(255) NOT NULL UNIQUE,
-    earn INT NOT NULL,
-    parent_company_id INT,
-    PRIMARY KEY (id)
-) DEFAULT CHARSET=utf8`
+    id INT
+)`
 
 (async () => {
     const client = await pool.connect();
