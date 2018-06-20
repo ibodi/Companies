@@ -1,6 +1,5 @@
 "use strict"
 
-let companiesSQL = require("./mock-companies.json");
 let config = require("./config.json");
 
 let mysql = require('mysql');

@@ -2,13 +2,23 @@
 
 const express = require('express');
 const app = express();
+// const path = require('path');
 const bodyParser = require("body-parser");
-const mysql = require('mysql');
+// const mysql = require('mysql');
 const config = require("./config.json");
-const child_process = require('child_process');
+// const child_process = require('child_process');
 const companiesSQL = require("./mock-companies.json");
+const PORT = process.env.PORT || 5000;
 
-const con = mysql.createConnection(config.mysql_connection);
+// const con = mysql.createConnection(config.mysql_connection);
+
+const { Pool } = require('pg');
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: true
+});
+
+
 
 app.use(express.static(__dirname + '/app'));
 app.use(bodyParser.json()); // this lets us receive json in REST requests
@@ -92,29 +102,50 @@ let companies = [
 // Forwards to main page with companies.
 app.get('/', function (req, res) {
 //    res.sendFile(__dirname + "/app/index.html");
+    console.error("HERE I AM")
     res.render("index");
+
+    
 });
 
 app.get('/api/companies', function (req, res) {
-    con.query("select * from companies", function (err, companiesSQL) {
-        if (err) {
-            console.log(JSON.stringify(err));
-            logErrorAndSendReport(err, res);
-            return;
-        };
+    // con.query("select * from companies", function (err, companiesSQL) {
+    //     if (err) {
+    //         console.log(JSON.stringify(err));
+    //         logErrorAndSendReport(err, res);
+    //         return;
+    //     };
+    //     let companies = companiesSQLTransform(companiesSQL);
+    //     con.query("select max(id) from companies", function(err, maxId){
+    //         if (err) {
+    //             logErrorAndSendReport(err, res);
+    //             return;
+    //         }
+    //         res.send({
+    //             success: true,
+    //             companies,
+    //             maxId: maxId.length == 0 ? 1 : maxId[0]["max(id)"]
+    //         });
+    //     });
+    // });
+
+    try {
+        console.log("I AM HERE IN API COMPANIES");
+        const client = await pool.connect();
+        const {rows : companiesSQL} = await client.query('select * from companies');
+        const {rows : [ { max : maxId } ]} = await client.query("select max(id) from companies");
+        client.release();
+        console.log("companiesSQL" + JSON.stringify(companiesSQL));
+        console.log("maxId" + maxId);
         let companies = companiesSQLTransform(companiesSQL);
-        con.query("select max(id) from companies", function(err, maxId){
-            if (err) {
-                logErrorAndSendReport(err, res);
-                return;
-            }
-            res.send({
-                success: true,
-                companies,
-                maxId: maxId.length == 0 ? 1 : maxId[0]["max(id)"]
-            });
+        res.send({
+            success: true,
+            companies,
+            maxId: maxId ? maxId : 1
         });
-    });
+    } catch (err) {
+        logErrorAndSendReport(err, res);
+    }
 });
 
 // Deletes all the data from the companies table
@@ -241,7 +272,7 @@ app.get("/*", function (req, res) {
     res.sendFile(__dirname + "/app/html/404.html");
 });
 
-app.listen(config.port, ()=>console.log("Server started"));
+app.listen(PORT, ()=>console.log("Server started. Listening on port " + PORT));
 
 function logErrorAndSendReport(err, res) {
     console.error(err.stack);
