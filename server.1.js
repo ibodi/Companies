@@ -308,7 +308,7 @@ app.post('/api/company', async function (req, res) {
     try {
         const client = await pool.connect();
 
-        await client.query("UPDATE companies SET name = \"" + name + "\", earn = " + earn +
+        await client.query("UPDATE companies SET name = '" + name + "', earn = " + earn +
             " WHERE id = " + id);
         client.release();
 
