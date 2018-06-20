@@ -14,6 +14,9 @@ let createTableQuery = `CREATE TABLE companies (
     PRIMARY KEY (id)
 ) DEFAULT CHARSET=utf8`
 
-const client = pool.connect(); // AWAIT IS ONLY VALID IN ASYNC FUNCTION
-client.query(createTableQuery);
-client.release();
+(async () => {
+    const client = await pool.connect();
+    await client.query(createTableQuery);
+    client.release();
+})();
+       
