@@ -139,15 +139,11 @@ app.get('/createdb', async (req, res) => {
     //     });
     // });
 
-    try {
-        const client = await pool.connect();
-        const result = await client.query("CREATE TABLE companies (id INT)");
-        console.log("CREATE DB RESULT:" + JSON.stringify(result, null, 2));
-        client.release();
-        res.send(result);
-    } catch (err) {
-        logErrorAndSendReport(err, res);
-    }
+    const client = await pool.connect();
+    const result = await client.query("CREATE TABLE companies (id INT)");
+    console.log("CREATE DB RESULT:" + JSON.stringify(result, null, 2));
+    client.release();
+    res.send(result);
 });
 
 app.get('/api/companies', async function (req, res) {
