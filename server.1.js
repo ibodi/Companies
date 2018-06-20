@@ -23,6 +23,23 @@ const pool = new Pool({
 app.use(express.static(__dirname + '/app'));
 app.use(bodyParser.json()); // this lets us receive json in REST requests
 
+
+let createTableQuery = `CREATE TABLE companies (
+    id INT NOT NULL,
+    name varchar(255) NOT NULL UNIQUE,
+    earn INT NOT NULL,
+    parent_company_id INT,
+    PRIMARY KEY (id)
+) DEFAULT CHARSET=utf8`
+
+(async () => {
+    const client = await pool.connect();
+    const result = await client.query(createTableQuery);
+    console.log("CREATE DB RESULT:" + JSON.stringify(result, null, 2));
+    client.release();
+})();
+
+
 /*
 // Short introduction
 
@@ -108,7 +125,7 @@ app.get('/', function (req, res) {
     
 });
 
-app.get('/api/companies', function (req, res) {
+app.get('/api/companies', async function (req, res) {
     // con.query("select * from companies", function (err, companiesSQL) {
     //     if (err) {
     //         console.log(JSON.stringify(err));
