@@ -285,7 +285,7 @@ app.put('/api/company', async function (req, res) {
     let company = req.body;
     try {
         const client = await pool.connect();
-        let value = "("
+        let value = "(" +
             company.id + ", '" +
             company.name + "', " +
             company.earn + ", " +
