@@ -24,15 +24,6 @@ app.use(express.static(__dirname + '/app'));
 app.use(bodyParser.json()); // this lets us receive json in REST requests
 
 
-// let createTableQuery = `CREATE TABLE companies (
-//     id INT NOT NULL,
-//     name varchar(255) NOT NULL UNIQUE,
-//     earn INT NOT NULL,
-//     parent_company_id INT,
-//     PRIMARY KEY (id)
-// ) DEFAULT CHARSET=utf8`
-
-
 /*
 // Short introduction
 
@@ -141,7 +132,15 @@ app.get('/createdb', async (req, res) => {
 
     try {
         const client = await pool.connect();
-        const result = await client.query("CREATE TABLE companies (id INT)");
+        const result = await client.query("drop TABLE companies");
+        let createTableQuery = `CREATE TABLE companies (
+            id INT NOT NULL,
+            name varchar(255) NOT NULL UNIQUE,
+            earn INT NOT NULL,
+            parent_company_id INT,
+            PRIMARY KEY (id)
+        ) DEFAULT CHARSET=utf8`
+        const result = await client.query(createTableQuery);
         console.log("CREATE DB RESULT:" + JSON.stringify(result, null, 2));
         client.release();
         res.send(result);
@@ -216,20 +215,16 @@ app.post("/api/companies", async function (req, res) {
         await client.query('delete from companies');
 
         let maxId = 1;
-        let values = [];
+        let values = "";
         for(let companySQL of companiesSQL) {
             if(maxId < companySQL.id) {
                 maxId = companySQL.id
             }
-            values.push([
-                companySQL.id,
-                companySQL.name,
-                companySQL.earn,
-                companySQL.parent_company_id
-            ]);
+            values += "(" + companySQL.id + ", '" + companySQL.name + "', " + 
+                companySQL.earn + ", " + companySQL.parent_company_id + "), ";
         }
-        let insertDbQuery = "INSERT INTO companies VALUES ?";
-        await client.query(insertDbQuery, values);
+        let insertDbQuery = "INSERT INTO companies VALUES " + values.substring(0, values.length - 2);
+        await client.query(insertDbQuery);
 
         client.release();
         let companies = companiesSQLTransform(companiesSQL);
