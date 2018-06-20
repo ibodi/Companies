@@ -241,66 +241,83 @@ app.post("/api/companies", async function (req, res) {
 app.delete('/api/company', function (req, res) {
     let id = parseInt(req.query.id);
     
-    con.query("select parent_company_id from companies where id = " + id + ";", function (err, result){
-        if (err) {
-            logErrorAndSendReport(err, res);
-            return;
-        }
-        let parent_company_id = result[0].parent_company_id;
-        con.query("delete from companies where id = " + id + ";", function(err, result){
-            if (err) {
-                logErrorAndSendReport(err, res);
-                return;
-            }
-            con.query("update companies set parent_company_id = " + parent_company_id + " where parent_company_id = " + id + ";", function (err, result) {
-                if (err) {
-                    logErrorAndSendReport(err, res);
-                    return;
-                }
-                res.send({
-                    success: true
-                });
-            });
+    // con.query("select parent_company_id from companies where id = " + id + ";", function (err, result){
+    //     if (err) {
+    //         logErrorAndSendReport(err, res);
+    //         return;
+    //     }
+    //     let parent_company_id = result[0].parent_company_id;
+    //     con.query("delete from companies where id = " + id + ";", function(err, result){
+    //         if (err) {
+    //             logErrorAndSendReport(err, res);
+    //             return;
+    //         }
+    //         con.query("update companies set parent_company_id = " + parent_company_id + " where parent_company_id = " + id + ";", function (err, result) {
+    //             if (err) {
+    //                 logErrorAndSendReport(err, res);
+    //                 return;
+    //             }
+    //             res.send({
+    //                 success: true
+    //             });
+    //         });
+    //     });
+    // });
+    try {
+        const client = await pool.connect();
+        const result1 = await client.query("select parent_company_id from companies where id = " + id);
+        const { rows : [ { parent_company_id } ] } = result1;
+
+        await client.query("delete from companies where id = " + id);
+        await client.query("update companies set parent_company_id = " + parent_company_id + " where parent_company_id = " + id);
+        client.release();
+        res.send({
+            success: true
         });
-    });
+    } catch (err) {
+        logErrorAndSendReport(err, res);
+    }
 });
 
 // Adds company to the database
 app.put('/api/company', function (req, res) {
 
     let company = req.body;
+    try {
+        const client = await pool.connect();
+        let value = "("
+            company.id + ", '" +
+            company.name + "', " +
+            company.earn + ", " +
+            company.parent_company_id + ")";
+        await client.query("insert into companies values " + value);
+        client.release();
 
-    let newRow = [[[
-        company.id,
-        company.name,
-        company.earn,
-        company.parent_company_id
-    ]]];
-    con.query("insert into companies values ?;", newRow, function (err, result) {
-        if(err) {
-            logErrorAndSendReport(err, res);
-            return;
-        }
         res.send({
             success: true,
         });
-    });
+    } catch (err) {
+        logErrorAndSendReport(err, res);
+    }
 });
 
 // Updates company in the database
 app.post('/api/company', function (req, res) {
     
     let { name , earn, id } = req.body;
-    con.query("UPDATE companies SET name = \"" + name + "\", earn = " + earn +
-             " WHERE id = " + id + ";", function (err, result) {
-        if(err) {
-            logErrorAndSendReport(err, res);
-            return;
-        }
+    try {
+        const client = await pool.connect();
+
+        await client.query("UPDATE companies SET name = \"" + name + "\", earn = " + earn +
+            " WHERE id = " + id);
+        client.release();
+
         res.send({
             success: true,
         });
-    });
+    } catch (err) {
+        logErrorAndSendReport(err, res);
+    }
 });
 
 // Forwards to 404 page
