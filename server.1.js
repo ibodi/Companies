@@ -238,7 +238,7 @@ app.post("/api/companies", async function (req, res) {
 });
 
 // Deletes the company from the database
-app.delete('/api/company', function (req, res) {
+app.delete('/api/company', async function (req, res) {
     let id = parseInt(req.query.id);
     
     // con.query("select parent_company_id from companies where id = " + id + ";", function (err, result){
@@ -280,7 +280,7 @@ app.delete('/api/company', function (req, res) {
 });
 
 // Adds company to the database
-app.put('/api/company', function (req, res) {
+app.put('/api/company', async function (req, res) {
 
     let company = req.body;
     try {
@@ -302,7 +302,7 @@ app.put('/api/company', function (req, res) {
 });
 
 // Updates company in the database
-app.post('/api/company', function (req, res) {
+app.post('/api/company', async function (req, res) {
     
     let { name , earn, id } = req.body;
     try {
