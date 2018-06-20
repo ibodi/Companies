@@ -16,7 +16,8 @@ let createTableQuery = `CREATE TABLE companies (
 
 (async () => {
     const client = await pool.connect();
-    await client.query(createTableQuery);
+    const result = await client.query(createTableQuery);
+    console.log("CREATE DB RESULT:" + JSON.stringify(result, null, 2));
     client.release();
 })();
        
