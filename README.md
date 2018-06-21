@@ -19,10 +19,8 @@ In order to run the app for the first time on your local machine you have to do 
 npm install
 ```
 9. Open config.json file in the root of the repo and change the value of the `user` field to you chosen user's name, the value of the `password` field to you chosen user's password, the value of `database` field to the name of the chosen database, and optionaly the value of `port` field to port that you want your server to listen on. 
-10. Create empty table companies by executing the command below.
-```node create_empty_table.js``` (MySQL) or ```node create_empty_table.1.js``` (PostgreSQL)
-11. Start the server by executing the command below.
-```node server.js``` (MySQL) or ```node server.1.js``` (PostgreSQL)
+10. Create empty table companies by executing the command `node create_empty_table.js` (MySQL) or `node create_empty_table.1.js` (PostgreSQL).
+11. Start the server by executing the command `node server.js` (MySQL) or `node server.1.js` (PostgreSQL).
 12. Go to http://localhost:PORT/, where you must replace `PORT` with the value of the field `port` in config.json.
 
 To run the app again you just need to do steps 3, 7, 11, 12.
