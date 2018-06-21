@@ -7,7 +7,7 @@ const pool = new Pool({
   ssl: false
 });
 
-let createTableQuery = `CREATE TABLE companies (
+const createTableQuery = `CREATE TABLE companies (
     id INT NOT NULL,
     name varchar(255) NOT NULL UNIQUE,
     earn INT NOT NULL,
