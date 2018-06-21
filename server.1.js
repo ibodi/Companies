@@ -7,10 +7,12 @@ const config = require("./config.json");
 const companiesSQL = require("./mock-companies.json");
 const PORT = process.env.PORT || 5000;
 
+const conString = process.env.DATABASE_URL || "postgres://ibodi:Biedronka2017@localhost:5432/companies";
+
 const { Pool } = require('pg');
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: true
+  connectionString: conString,
+  ssl: false
 });
 
 app.use(express.static(__dirname + '/app'));

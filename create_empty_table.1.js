@@ -1,9 +1,10 @@
 "use strict"
 
 const { Pool } = require('pg');
+const conString = process.env.DATABASE_URL || "postgres://ibodi:Biedronka2017@localhost:5432/companies";
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: true
+  connectionString: conString,
+  ssl: false
 });
 
 let createTableQuery = `CREATE TABLE companies (
@@ -12,7 +13,7 @@ let createTableQuery = `CREATE TABLE companies (
     earn INT NOT NULL,
     parent_company_id INT,
     PRIMARY KEY (id)
-)`; //  DEFAULT CHARSET=utf8 // DFAULT doesn't work
+)`; //  DEFAULT CHARSET=utf8 // DFAULT doesn't workf
 
 (async () => {
     const client = await pool.connect();
