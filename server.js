@@ -9,11 +9,44 @@ const child_process = require('child_process');
 const companiesSQL = require("./mock-companies.json");
 const { companiesSQLTransform } = require("./comp_transform");
 const { logErrorAndSendReport } = require("./log_err_and_send_report");
-
 const con = mysql.createConnection(config.connection);
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
 
 app.use(express.static(__dirname + '/app'));
+app.use(express.static(__dirname + '/node_modules'));
 app.use(bodyParser.json()); // this lets us receive json in REST requests
+
+io.on('connection', function(socket){
+    socket.on("update", async function () {
+        con.query("select * from companies", function (err, companiesSQL) {
+            if (err) {
+                console.error(err.stack);
+                socket.broadcast.emit("update",{
+                    success : false,
+                    cause : err.name + " : " + err.message
+                });
+                return;
+            };
+            let companies = companiesSQLTransform(companiesSQL);
+            con.query("select max(id) from companies", function(err, maxId){
+                if (err) {
+                    console.error(err.stack);
+                    socket.broadcast.emit("update",{
+                        success : false,
+                        cause : err.name + " : " + err.message
+                    });
+                    return;
+                }
+                socket.broadcast.emit("update",{
+                    success: true,
+                    companies,
+                    maxId: maxId.length == 0 ? 1 : maxId[0]["max(id)"]
+                });
+            });
+        });
+    });
+});
 
 // Forwards to main page with companies.
 app.get('/', function (req, res) {
@@ -167,4 +200,5 @@ app.get("/*", function (req, res) {
     res.sendFile(__dirname + "/app/html/404.html");
 });
 
-app.listen(config.port, ()=>console.log("Server started. Listening at " + config.port));
+// app.listen(config.port, ()=>console.log("Server started. Listening at " + config.port));
+http.listen(config.port, ()=>console.log("Server started. Listening on port " + config.port));

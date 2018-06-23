@@ -1,5 +1,6 @@
 "use strict"
 
+var socket = io();
 
 // setTimeout(() => {
 //     let xhttp = new XMLHttpRequest();
@@ -9,7 +10,6 @@
 //     xhttp.open("GET", "/createdb", true);
 //     xhttp.send();
 // }, 0);
-
 
 Array.prototype.contains = function (value) {
     return this.indexOf(value) > -1;
@@ -29,6 +29,19 @@ let maxId;
 // with already used name
 let companyNames = [];
 
+socket.on("update", function (report) {
+    if (report.success) {
+        maxId = report.maxId;
+        companyNames = [];
+        let companies = report.companies;
+        updateCompanyNames(companies);
+        createListElement(companies);          
+    } else {
+        error.innerHTML = "<li>Failed to update companies tree.</li>";
+        console.error(report.cause);
+    }
+});
+
 // This will be executed after the page is loaded for 
 // taking data from the database and drawing the list of trees of companies
 // might take some time
@@ -40,9 +53,7 @@ setTimeout(() => {
             maxId = report.maxId;
             let companies = report.companies;
             updateCompanyNames(companies);
-
-            createListElement(companies);
-            
+            createListElement(companies);          
         } else {
             error.innerHTML = "<li>Failed to load companies tree.</li>";
             console.error(report.cause);
@@ -91,6 +102,8 @@ function replaceAllRowsInCompanyTableWithMockData() {
 
             let companyNames = [];
             updateCompanyNames(companies);
+
+            socket.emit("update");
         } else {
             error.innerHTML = "<li>Failed to drop the database and create a new one with mock data.</li>";
             console.error(report.cause);
@@ -108,6 +121,8 @@ function deleteAllValuesInCompaniesTable() {
             maxId = 1;
             companyNames = [];
             createListElement([]);
+
+            socket.emit("update");
         } else {
             error.innerHTML = "<li>Failed to delete all companies.</li>";
             console.error(report.cause);
@@ -160,8 +175,7 @@ function createCompanyHTMLElement(company) {
     tdCompanyEarn.innerHTML = company.earn;
     tdCompanyEarnPlusSubcompEarn.innerHTML = company.earn_plus_subcomp_earn;
 
-    function  deleteCompany() {
-        
+    function deleteCompany() { 
         let companyEarnings = parseInt(tdCompanyEarn.innerHTML);
         let index = companyNames.indexOf(tdCompanyName.innerHTML);
         deleteCompanyFromDatabaseAndLiTag(company.id, li, index, companyEarnings);
@@ -253,6 +267,8 @@ function deleteCompanyFromDatabaseAndLiTag(id, liCompany,
             }
             deleteCompanyLiTag(liCompany);
             companyNames.splice(indexInCompanyNames, 1);
+
+            socket.emit("update");
         } else {
             error.innerHTML = "<li>Failed to delete company.</li>";
             console.error(report.cause);
@@ -301,6 +317,8 @@ function updateCompanyInDatabaseAndItsTag(id, newCompanyName, newCompanyEarnings
             tdCompanyName.innerHTML = newCompanyName;
             tdCompanyEarn.innerHTML = newCompanyEarnings;
             saveButton.replaceWith(editButton);
+
+            socket.emit("update");
         } else {
             error.innerHTML = "<li>Failed to update company in the database.</li>";
             console.error(report.cause); 
@@ -341,6 +359,7 @@ function addCompanyToDataBaseAndAddItsTag(newCompanyId, newCompanyName,
             liCompanyInput.replaceWith(newLiCompany);
             liCompanyInput.remove();
 
+            socket.emit("update");
         } else {
             error.innerHTML = "<li>Failed to add company to database.</li>";
             console.error(report.cause);

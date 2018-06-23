@@ -8,6 +8,8 @@ const companiesSQL = require("./mock-companies.json");
 const PORT = process.env.PORT || port;
 const { companiesSQLTransform } = require("./comp_transform");
 const { logErrorAndSendReport } = require("./log_err_and_send_report");
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
 
 const conString = process.env.DATABASE_URL || 
     `postgres://${ user }:${ password }@${ host }:5432/${ database }`;
@@ -19,11 +21,37 @@ const pool = new Pool({
 });
 
 app.use(express.static(__dirname + '/app'));
+app.use(express.static(__dirname + '/node_modules'));
 app.use(bodyParser.json()); // this lets us receive json in REST requests
+
+io.on('connection', function(socket){
+    socket.on("update", async function () {
+        try {
+            const client = await pool.connect();
+            const {rows : companiesSQL} = await client.query('select * from companies');
+            const {rows : [ { max : maxId } ]} = await client.query("select max(id) from companies");
+            client.release();
+            
+            let companies = companiesSQLTransform(companiesSQL);
+            socket.broadcast.emit("update",{
+                success: true,
+                companies,
+                maxId: maxId ? maxId : 1
+            });
+        } catch (err) {
+            console.error(err.stack);
+            socket.broadcast.emit("update",{
+                success : false,
+                cause : err.name + " : " + err.message
+            });
+        }
+    });
+});
 
 // Forwards to main page with companies.
 app.get('/', function (req, res) {
-    res.render("index");   
+    res.render("index");  
+    // res.sendFile(__dirname + '/app/index.html'); 
 });
 
 app.get('/api/companies', async function (req, res) {
@@ -151,4 +179,5 @@ app.get("/*", function (req, res) {
     res.sendFile(__dirname + "/app/html/404.html");
 });
 
-app.listen(PORT, ()=>console.log("Server started. Listening on port " + PORT));
+// app.listen(PORT, ()=>console.log("Server started. Listening on port " + PORT));
+http.listen(PORT, ()=>console.log("Server started. Listening on port " + PORT));

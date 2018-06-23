@@ -2,8 +2,8 @@
     "port": 8081,
     "connection": {
         "host": "localhost",
-        "user": "user",
-        "password": "password",
+        "user": "root",
+        "password": "Biedronka2017",
         "database": "companies"
     }
 }
