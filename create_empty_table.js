@@ -2,7 +2,7 @@
 
 const config = require("./config.json");
 const mysql = require('mysql');
-const con = mysql.createConnection(config.mysql_connection);
+const con = mysql.createConnection(config.connection);
 
 const createTableQuery = `CREATE TABLE companies (
     id INT NOT NULL,
